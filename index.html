@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rockin' Voca</title>
+    <title>Tetris</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
@@ -11,22 +11,24 @@
 </head>
 <body>
     <div id="main-container">
-        <div id="quiz-section">
-            <h1>Rockin' Voca</h1>
-            <div id="quiz-container">
-                <p id="korean-word"></p>
-                <input type="text" id="answer-input" placeholder="Enter English word">
-                <button id="check-button">Check</button>
-                <button id="next-button" style="display:none;">Next Word</button>
-                <p id="feedback"></p>
+        <h1>TETRIS</h1>
+        <div id="info-panel">
+            <div class="info-box">
+                <span class="info-label">SCORE</span>
+                <span id="score-display">0</span>
+            </div>
+            <div class="info-box">
+                <span class="info-label">LEVEL</span>
+                <span id="level-display">1</span>
+            </div>
+            <div class="info-box">
+                <span class="info-label">LINES</span>
+                <span id="lines-display">0</span>
             </div>
         </div>
-        <div id="game-section">
-            <canvas id="tetris-board" width="300" height="600"></canvas>
-        </div>
+        <canvas id="tetris-board" width="300" height="600"></canvas>
+        <div id="controls-hint">← → 이동 &nbsp;|&nbsp; ↑ 회전 &nbsp;|&nbsp; ↓ 빠른 낙하 &nbsp;|&nbsp; Space 즉시 낙하</div>
     </div>
-    <audio id="success-sound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
     <script src="tetris.js"></script>
-    <script src="main.js"></script>
 </body>
-</html>c
+</html>

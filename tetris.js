@@ -1,4 +1,3 @@
-
 const canvas = document.getElementById('tetris-board');
 const context = canvas.getContext('2d');
 
@@ -18,207 +17,276 @@ const COLORS = [
 ];
 
 const SHAPES = [
-    [], // Empty
-    [[1, 1, 1, 1]], // I
-    [[2, 0, 0], [2, 2, 2]], // J
-    [[0, 0, 3], [3, 3, 3]], // L
-    [[4, 4], [4, 4]], // O
-    [[0, 5, 5], [5, 5, 0]], // S
-    [[0, 6, 0], [6, 6, 6]], // T
-    [[7, 7, 0], [0, 7, 7]]  // Z
+    [],
+    [[1, 1, 1, 1]],           // I
+    [[2, 0, 0], [2, 2, 2]],   // J
+    [[0, 0, 3], [3, 3, 3]],   // L
+    [[4, 4], [4, 4]],          // O
+    [[0, 5, 5], [5, 5, 0]],   // S
+    [[0, 6, 0], [6, 6, 6]],   // T
+    [[7, 7, 0], [0, 7, 7]]    // Z
 ];
 
+const SCORE_TABLE = [0, 100, 300, 500, 800]; // 0~4줄 클리어 점수
+
 let board = [];
-let piece = null; // Start with no piece
+let piece = null;
+let nextPieceType = null;
 let score = 0;
-let gameOver = false;
+let level = 1;
+let linesTotal = 0;
+let gameRunning = false;
 
-// Initialize the game board
-function initTetris() {
-    for (let r = 0; r < ROWS; r++) {
-        board.push(Array(COLS).fill(0));
-    }
-    // The first piece is spawned by getting the first question right.
-    drawBoard();
+const scoreEl = document.getElementById('score-display');
+const levelEl = document.getElementById('level-display');
+const linesEl = document.getElementById('lines-display');
+
+function initBoard() {
+    board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 }
 
-// --- Drawing Functions ---
-function drawBoard() {
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            drawSquare(c, r, board[r][c]);
-        }
-    }
-}
-
-function drawSquare(x, y, colorIndex) {
-    context.fillStyle = COLORS[colorIndex] || '#1E1E1E';
-    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-    context.strokeStyle = '#333';
-    context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-}
-
-function drawPiece() {
-    if (!piece) return;
-    context.fillStyle = COLORS[piece.typeId];
-    piece.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value > 0) {
-                drawSquare(piece.x + x, piece.y + y, piece.typeId);
-            }
-        });
-    });
-}
-
-// --- Game Logic ---
-
-// This function is called from main.js as a reward
-function spawnNewPiece() {
-    if (gameOver) return;
-    const typeId = Math.floor(Math.random() * (SHAPES.length - 1)) + 1;
-    const matrix = SHAPES[typeId];
-    piece = {
+function createPiece(typeId) {
+    const matrix = SHAPES[typeId].map(row => [...row]);
+    return {
         x: Math.floor(COLS / 2) - Math.floor(matrix[0].length / 2),
         y: 0,
-        matrix: matrix,
-        typeId: typeId
+        matrix,
+        typeId
     };
+}
 
-    if (isCollision()) {
-        gameOver = true;
-        alert('Game Over! Your score: ' + score);
-        // Reset board
-        board = [];
-        initTetris();
-        score = 0;
-        gameOver = false;
-        piece = null;
+function randomTypeId() {
+    return Math.floor(Math.random() * (SHAPES.length - 1)) + 1;
+}
+
+function spawnPiece() {
+    const typeId = nextPieceType ?? randomTypeId();
+    nextPieceType = randomTypeId();
+    piece = createPiece(typeId);
+
+    if (isCollision(piece)) {
+        showGameOver();
+        gameRunning = false;
     }
 }
 
-function drop() {
-    if (gameOver || !piece) return;
-
-    piece.y++;
-    if (isCollision()) {
-        piece.y--;
-        merge();
-        clearLines();
-        piece = null; // Stop the piece, wait for next reward
-    }
-}
-
-function isCollision() {
-    if (!piece) return false;
-    for (let y = 0; y < piece.matrix.length; y++) {
-        for (let x = 0; x < piece.matrix[y].length; x++) {
-            if (
-                piece.matrix[y][x] !== 0 &&
-                (
-                    (board[piece.y + y] && board[piece.y + y][piece.x + x]) !== 0 ||
-                     !board[piece.y + y] // Check for out of bounds vertically
-                )
-            ) {
-                return true;
-            }
+function isCollision(p) {
+    for (let y = 0; y < p.matrix.length; y++) {
+        for (let x = 0; x < p.matrix[y].length; x++) {
+            if (p.matrix[y][x] === 0) continue;
+            const nx = p.x + x;
+            const ny = p.y + y;
+            if (nx < 0 || nx >= COLS || ny >= ROWS) return true;
+            if (ny >= 0 && board[ny][nx] !== 0) return true;
         }
     }
     return false;
 }
 
 function merge() {
-    if (!piece) return;
     piece.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value !== 0) {
-                if(board[piece.y + y]) {
-                  board[piece.y + y][piece.x + x] = piece.typeId;
-                }
+        row.forEach((val, x) => {
+            if (val !== 0) {
+                board[piece.y + y][piece.x + x] = piece.typeId;
             }
         });
     });
 }
 
 function clearLines() {
-    let linesCleared = 0;
-    outer: for (let r = ROWS - 1; r >= 0; r--) {
-        for (let c = 0; c < COLS; c++) {
-            if (board[r][c] === 0) {
-                continue outer;
-            }
+    let cleared = 0;
+    for (let r = ROWS - 1; r >= 0; r--) {
+        if (board[r].every(cell => cell !== 0)) {
+            board.splice(r, 1);
+            board.unshift(Array(COLS).fill(0));
+            r++;
+            cleared++;
         }
-        const row = board.splice(r, 1)[0].fill(0);
-        board.unshift(row);
-        r++; // Check the new row at the same index
-        linesCleared++;
     }
-    if (linesCleared > 0) {
-        score += linesCleared * 10;
-        // TODO: Update a score display element
+    if (cleared > 0) {
+        score += SCORE_TABLE[cleared] * level;
+        linesTotal += cleared;
+        level = Math.floor(linesTotal / 10) + 1;
+        scoreEl.textContent = score;
+        levelEl.textContent = level;
+        linesEl.textContent = linesTotal;
     }
+}
+
+function drop() {
+    piece.y++;
+    if (isCollision(piece)) {
+        piece.y--;
+        merge();
+        clearLines();
+        spawnPiece();
+    }
+    dropCounter = 0;
+}
+
+function hardDrop() {
+    while (!isCollision({ ...piece, y: piece.y + 1 })) {
+        piece.y++;
+    }
+    merge();
+    clearLines();
+    spawnPiece();
+    dropCounter = 0;
 }
 
 function rotate() {
-    if (!piece) return;
-    const result = [];
-    for (let i = 0; i < piece.matrix[0].length; i++) {
-        result.push([]);
-    }
-
-    for (let r = 0; r < piece.matrix.length; r++) {
-        for (let c = 0; c < piece.matrix[r].length; c++) {
-            result[c][piece.matrix.length - 1 - r] = piece.matrix[r][c];
-        }
-    }
-    
-    const originalMatrix = piece.matrix;
+    const result = piece.matrix[0].map((_, i) =>
+        piece.matrix.map(row => row[i]).reverse()
+    );
+    const original = piece.matrix;
     piece.matrix = result;
 
-    // Prevent rotating into other pieces or walls
-    if (isCollision()) {
-        piece.matrix = originalMatrix; // Revert rotation
+    // Wall kick
+    let offset = 1;
+    while (isCollision(piece)) {
+        piece.x += offset;
+        offset = -(offset < 0 ? offset - 1 : offset + 1);
+        if (offset > piece.matrix[0].length) {
+            piece.matrix = original;
+            return;
+        }
     }
 }
 
-// --- User Input ---
-document.addEventListener('keydown', event => {
-    if (gameOver || !piece) return;
+function drawSquare(x, y, colorIndex, alpha = 1) {
+    context.globalAlpha = alpha;
+    context.fillStyle = COLORS[colorIndex] || '#1A1A2E';
+    context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    context.strokeStyle = 'rgba(0,0,0,0.4)';
+    context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    context.globalAlpha = 1;
+}
 
-    if (event.key === 'ArrowLeft') {
-        piece.x--;
-        if (isCollision()) piece.x++;
-    } else if (event.key === 'ArrowRight') {
-        piece.x++;
-        if (isCollision()) piece.x--;
-    } else if (event.key === 'ArrowDown') {
-        drop();
-    } else if (event.key === 'ArrowUp') {
-        rotate();
+function drawGhost() {
+    if (!piece) return;
+    let ghost = { ...piece, matrix: piece.matrix };
+    while (!isCollision({ ...ghost, y: ghost.y + 1 })) {
+        ghost = { ...ghost, y: ghost.y + 1 };
+    }
+    ghost.matrix.forEach((row, y) => {
+        row.forEach((val, x) => {
+            if (val > 0) {
+                drawSquare(ghost.x + x, ghost.y + y, ghost.typeId, 0.2);
+            }
+        });
+    });
+}
+
+function drawBoard() {
+    context.fillStyle = '#1A1A2E';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Grid lines
+    context.strokeStyle = 'rgba(255,255,255,0.03)';
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            context.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        }
+    }
+
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (board[r][c] !== 0) {
+                drawSquare(c, r, board[r][c]);
+            }
+        }
+    }
+}
+
+function drawPiece() {
+    if (!piece) return;
+    piece.matrix.forEach((row, y) => {
+        row.forEach((val, x) => {
+            if (val > 0) {
+                drawSquare(piece.x + x, piece.y + y, piece.typeId);
+            }
+        });
+    });
+}
+
+function showGameOver() {
+    const overlay = document.createElement('div');
+    overlay.id = 'game-over-overlay';
+    overlay.innerHTML = `
+        <h2>GAME OVER</h2>
+        <p>Score: ${score}</p>
+        <button id="restart-button">RESTART</button>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('restart-button').addEventListener('click', () => {
+        overlay.remove();
+        startGame();
+    });
+}
+
+function startGame() {
+    initBoard();
+    score = 0;
+    level = 1;
+    linesTotal = 0;
+    nextPieceType = null;
+    scoreEl.textContent = '0';
+    levelEl.textContent = '1';
+    linesEl.textContent = '0';
+    gameRunning = true;
+    spawnPiece();
+}
+
+document.addEventListener('keydown', event => {
+    if (!gameRunning || !piece) return;
+    switch (event.key) {
+        case 'ArrowLeft':
+            piece.x--;
+            if (isCollision(piece)) piece.x++;
+            break;
+        case 'ArrowRight':
+            piece.x++;
+            if (isCollision(piece)) piece.x--;
+            break;
+        case 'ArrowDown':
+            drop();
+            break;
+        case 'ArrowUp':
+            rotate();
+            break;
+        case ' ':
+            event.preventDefault();
+            hardDrop();
+            break;
     }
 });
 
-
-// --- Game Loop ---
 let lastTime = 0;
 let dropCounter = 0;
-const dropInterval = 1000; // Drop every second
 
-function update(time = 0) {
-    const deltaTime = time - lastTime;
-    lastTime = time;
-
-    dropCounter += deltaTime;
-    if (dropCounter > dropInterval) {
-        drop();
-        dropCounter = 0;
-    }
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    drawBoard();
-    if(piece) drawPiece();
-    
-    requestAnimationFrame(update);
+function getDropInterval() {
+    return Math.max(100, 1000 - (level - 1) * 80);
 }
 
-// Kick off the game
-update();
+function gameLoop(time = 0) {
+    const delta = time - lastTime;
+    lastTime = time;
+
+    if (gameRunning) {
+        dropCounter += delta;
+        if (dropCounter > getDropInterval()) {
+            drop();
+        }
+    }
+
+    drawBoard();
+    if (piece) {
+        drawGhost();
+        drawPiece();
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+startGame();
+gameLoop();
