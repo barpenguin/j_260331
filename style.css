@@ -1,1 +1,105 @@
-/* Add styles here */
+body {
+    background-color: #121212;
+    color: #FFFFFF;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+    height: 100vh;
+    margin: 0;
+    padding-top: 2rem; /* Add some padding at the top */
+}
+
+#main-container {
+    display: flex;
+    gap: 2rem;
+    width: 90%;
+    max-width: 1200px;
+}
+
+#quiz-section {
+    flex: 1;
+    text-align: center;
+}
+
+#game-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    font-family: 'Black Ops One', cursive;
+    font-size: 4rem;
+    color: #00BFFF;
+    margin-bottom: 2rem;
+}
+
+#quiz-container {
+    background-color: #1E1E1E;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+}
+
+#korean-word {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+#answer-input {
+    width: 80%;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #FFFFFF;
+    border-radius: 5px;
+}
+
+#check-button, #next-button {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 5px;
+    margin-top: 1rem;
+    cursor: pointer;
+    font-family: 'Black Ops One', cursive;
+}
+
+#check-button {
+    background-color: #00BFFF;
+    color: #121212;
+}
+
+#next-button {
+    background-color: #FF4500;
+    color: #FFFFFF;
+}
+
+#check-button:hover {
+    background-color: #FF4500;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+}
+
+#feedback {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    height: 20px;
+}
+
+.correct {
+    color: #00BFFF;
+}
+
+.incorrect {
+    color: #FF4500;
+}
+
+#tetris-board {
+    border: 2px solid #00BFFF;
+    border-radius: 5px;
+}

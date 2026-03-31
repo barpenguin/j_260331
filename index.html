@@ -1,14 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockin' Voca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <div id="main-container">
+        <div id="quiz-section">
+            <h1>Rockin' Voca</h1>
+            <div id="quiz-container">
+                <p id="korean-word"></p>
+                <input type="text" id="answer-input" placeholder="Enter English word">
+                <button id="check-button">Check</button>
+                <button id="next-button" style="display:none;">Next Word</button>
+                <p id="feedback"></p>
+            </div>
+        </div>
+        <div id="game-section">
+            <canvas id="tetris-board" width="300" height="600"></canvas>
+        </div>
+    </div>
+    <audio id="success-sound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
+    <script src="tetris.js"></script>
+    <script src="main.js"></script>
 </body>
-</html>
+</html>c
