@@ -9,9 +9,10 @@ body {
     color: #FFFFFF;
     font-family: sans-serif;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    padding: 2rem 1rem;
 }
 
 #main-container {
@@ -68,6 +69,22 @@ h1 {
     font-size: 0.75rem;
     color: #555;
     letter-spacing: 0.05em;
+}
+
+#comments-section {
+    width: 100%;
+    max-width: 700px;
+    margin-top: 3rem;
+    padding-bottom: 4rem;
+}
+
+#comments-title {
+    font-family: 'Black Ops One', cursive;
+    font-size: 1.5rem;
+    color: #00BFFF;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
 }
 
 #game-over-overlay {
